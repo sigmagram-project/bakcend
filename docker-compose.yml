@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: imageboard-postgres
+    environment:
+      POSTGRES_DB: imageboard
+      POSTGRES_USER: imageboard
+      POSTGRES_PASSWORD: imageboard
+    ports:
+      - "5433:5432"
+    volumes:
+      - imageboard-db-data:/var/lib/postgresql/data
+
+volumes:
+  imageboard-db-data:

@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:imageboard;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+# Use with @ActiveProfiles("test") in test classes so the test suite
+# doesn't require a running Postgres instance.

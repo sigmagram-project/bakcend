@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 /**
- * DB schema is provided -- NOT a task placeholder.
+ * DB schema is provided .
  * Image bytes are stored directly in Postgres as a BLOB (bytea), per the
  * "DB blob" storage decision for this assignment.
  */

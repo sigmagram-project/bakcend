@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Infra-only class -- NOT a task placeholder. Allows the React dev server
+ * Allows the React dev server
  * to call the API. Nothing to implement here.
  */
 @Configuration

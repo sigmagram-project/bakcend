@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 /**
- * DB schema is provided -- NOT a task placeholder.
+ * DB schema is provided.
  */
 @Entity
 @Table(name = "feedback")

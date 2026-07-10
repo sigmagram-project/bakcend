@@ -1,10 +1,14 @@
 package com.example.imageboard.controller;
 
 import com.example.imageboard.dto.ImageSummaryDto;
+import com.example.imageboard.entity.ImageEntity;
 import com.example.imageboard.repository.ImageRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -34,18 +38,44 @@ public class ImageController {
     // ======================================
     @PostMapping
     public ResponseEntity<ImageSummaryDto> uploadImage(@RequestParam("file") MultipartFile file) {
-        throw new UnsupportedOperationException("TODO: implement image upload (Task 1 - backend)");
+        if (true) { // TODO: replace `true` with the real condition (e.g. file == null || file.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is required");
+        }
+        String contentType = file.getContentType();
+        if (true) { // TODO: replace `true` with the real condition (e.g. contentType == null || !contentType.startsWith("image/"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only image uploads are allowed");
+        }
+
+        ImageEntity image = null; // TODO: create an ImageEntity, set filename/contentType/data from `file`
+
+        ImageEntity saved = imageRepository.save(image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(saved));
     }
+
+
 
     // ---------------------------------------------------------------
     // ===== PLACEHOLDER: BACKEND TEAM =====
     // TODO (Task 1 - backend):
     //   Return all images (as ImageSummaryDto, newest first) so the
     //   frontend gallery can render them.
+    //
+    //   Hints:
+    //   1. imageRepository.findAll() gives you a List<ImageEntity>.
+    //   2. Sort it by uploadedAt, newest first -- e.g.
+    //      Comparator.comparing(ImageEntity::getUploadedAt).reversed()
+    //   3. Convert each ImageEntity into an ImageSummaryDto using the
+    //      toSummary(...) helper already defined at the bottom of this class.
+    //   4. One way to do all 3 steps at once:
+    //      imageRepository.findAll().stream()
+    //          .sorted(Comparator.comparing(ImageEntity::getUploadedAt).reversed())
+    //          .map(ImageController::toSummary)
+    //          .toList();
     // ======================================
     @GetMapping
     public ResponseEntity<List<ImageSummaryDto>> listImages() {
-        throw new UnsupportedOperationException("TODO: implement image listing (Task 1 - backend)");
+        List<ImageSummaryDto> images = null; //write logic to get images from  imageRepository.findAll() and map it ImageSummaryDto using toSummary;
+        return ResponseEntity.ok(images);
     }
 
     // ---------------------------------------------------------------
@@ -57,6 +87,18 @@ public class ImageController {
     // ======================================
     @GetMapping("/{id}/data")
     public ResponseEntity<byte[]> getImageData(@PathVariable Long id) {
-        throw new UnsupportedOperationException("TODO: implement image byte serving (Task 1 - backend)");
+        ImageEntity image = null; //write code to get the ImageEntity from imageRepository
+
+        MediaType mediaType;
+        try {
+            mediaType = MediaType.parseMediaType(image.getContentType());
+        } catch (Exception e) {
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+        return ResponseEntity.ok().contentType(mediaType).body(null); // TODO: return image.getData() instead of null
+    }
+
+    private static ImageSummaryDto toSummary(ImageEntity image) {
+        return new ImageSummaryDto(image.getId(), image.getFilename(), image.getLikeCount(), image.getUploadedAt());
     }
 }

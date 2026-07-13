@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -37,16 +39,22 @@ public class ImageController {
     //   4. Return 201 Created with an ImageSummaryDto for the saved image.
     // ======================================
     @PostMapping
-    public ResponseEntity<ImageSummaryDto> uploadImage(@RequestParam("file") MultipartFile file) {
-        if (true) { // TODO: replace `true` with the real condition (e.g. file == null || file.isEmpty())
+    public ResponseEntity<ImageSummaryDto> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is required");
         }
         String contentType = file.getContentType();
-        if (true) { // TODO: replace `true` with the real condition (e.g. contentType == null || !contentType.startsWith("image/"))
+        if (!contentType.startsWith("image/")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only image uploads are allowed");
         }
+        if(file.getOriginalFilename() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error");
+        }
+        ImageEntity image = new ImageEntity();
 
-        ImageEntity image = null; // TODO: create an ImageEntity, set filename/contentType/data from `file`
+        image.setFilename(file.getOriginalFilename() + "_" + LocalDate.now());
+        image.setData(file.getBytes());
+        image.setContentType(contentType);
 
         ImageEntity saved = imageRepository.save(image);
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(saved));

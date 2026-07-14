@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/api/images/{id}")
 public class LikeController {
@@ -25,8 +27,11 @@ public class LikeController {
     // POST /api/images/{id}/like
     @PostMapping("/like")
     public ResponseEntity<Integer> like(@PathVariable Long id) {
-        // TODO: Check that id is not null and is greater than 0.
         // Hint: throw ResponseStatusException with BAD_REQUEST when invalid.
+
+        if(Objects.nonNull(id) && id > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id must be not null and greater than 0");
+        }
 
         // The helper finds the image or returns HTTP 404.
         ImageEntity image = findImage(id);
@@ -34,8 +39,7 @@ public class LikeController {
         // Read the current value from the image.
         int currentLikeCount = image.getLikeCount();
 
-        // TODO: Calculate the new like count.
-        int updatedLikeCount = 0;
+        int updatedLikeCount = currentLikeCount + 1;
 
         // Store the new value on the entity.
         image.setLikeCount(updatedLikeCount);
@@ -52,14 +56,19 @@ public class LikeController {
     // POST /api/images/{id}/unlike
     @PostMapping("/unlike")
     public ResponseEntity<Integer> unlike(@PathVariable Long id) {
-        // TODO: Check that id is not null and is greater than 0.
+        if(Objects.nonNull(id) && id > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id must be not null and greater than 0");
+        }
 
         ImageEntity image = findImage(id);
         int currentLikeCount = image.getLikeCount();
 
-        // TODO: Subtract 1, but do not allow the result to be below 0.
         // Hint: use an if statement or Math.max(...).
+
         int updatedLikeCount = 0;
+        if(currentLikeCount > 0) {
+            updatedLikeCount = currentLikeCount - 1;
+        }
 
         image.setLikeCount(updatedLikeCount);
         ImageEntity savedImage = imageRepository.save(image);
@@ -71,10 +80,9 @@ public class LikeController {
     private ImageEntity findImage(Long id) {
         // findById returns an Optional because the image may not exist.
         return imageRepository.findById(id)
-                // TODO: Replace the message to some custom error message
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "TODO"
+                        "Can't find ID"
                 ));
     }
 }

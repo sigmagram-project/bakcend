@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -27,67 +29,42 @@ public class ImageController {
         this.imageRepository = imageRepository;
     }
 
-    // ---------------------------------------------------------------
-    // ===== PLACEHOLDER: BACKEND TEAM =====
-    // TODO (Task 1 - backend):
-    //   1. Accept a multipart file upload ("file" part).
-    //   2. Validate content type (image/*) and size.
-    //   3. Build an ImageEntity from the upload and persist it via
-    //      imageRepository.save(...).
-    //   4. Return 201 Created with an ImageSummaryDto for the saved image.
-    // ======================================
     @PostMapping
     public ResponseEntity<ImageSummaryDto> uploadImage(@RequestParam("file") MultipartFile file) {
-        if (true) { // TODO: replace `true` with the real condition (e.g. file == null || file.isEmpty())
+        if (file == null || file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is required");
         }
         String contentType = file.getContentType();
-        if (true) { // TODO: replace `true` with the real condition (e.g. contentType == null || !contentType.startsWith("image/"))
+        if (contentType == null || !contentType.startsWith("image/")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only image uploads are allowed");
         }
 
-        ImageEntity image = null; // TODO: create an ImageEntity, set filename/contentType/data from `file`
+        ImageEntity image = new ImageEntity();
+        image.setFilename(file.getOriginalFilename() != null ? file.getOriginalFilename() : "unnamed");
+        image.setContentType(contentType);
+        try {
+            image.setData(file.getBytes());
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not read uploaded file", e);
+        }
 
         ImageEntity saved = imageRepository.save(image);
         return ResponseEntity.status(HttpStatus.CREATED).body(toSummary(saved));
     }
 
-
-
-    // ---------------------------------------------------------------
-    // ===== PLACEHOLDER: BACKEND TEAM =====
-    // TODO (Task 1 - backend):
-    //   Return all images (as ImageSummaryDto, newest first) so the
-    //   frontend gallery can render them.
-    //
-    //   Hints:
-    //   1. imageRepository.findAll() gives you a List<ImageEntity>.
-    //   2. Sort it by uploadedAt, newest first -- e.g.
-    //      Comparator.comparing(ImageEntity::getUploadedAt).reversed()
-    //   3. Convert each ImageEntity into an ImageSummaryDto using the
-    //      toSummary(...) helper already defined at the bottom of this class.
-    //   4. One way to do all 3 steps at once:
-    //      imageRepository.findAll().stream()
-    //          .sorted(Comparator.comparing(ImageEntity::getUploadedAt).reversed())
-    //          .map(ImageController::toSummary)
-    //          .toList();
-    // ======================================
     @GetMapping
     public ResponseEntity<List<ImageSummaryDto>> listImages() {
-        List<ImageSummaryDto> images = null; //write logic to get images from  imageRepository.findAll() and map it ImageSummaryDto using toSummary;
+        List<ImageSummaryDto> images = imageRepository.findAll().stream()
+                .sorted(Comparator.comparing(ImageEntity::getUploadedAt).reversed())
+                .map(ImageController::toSummary)
+                .toList();
         return ResponseEntity.ok(images);
     }
 
-    // ---------------------------------------------------------------
-    // ===== PLACEHOLDER: BACKEND TEAM =====
-    // TODO (Task 1 - backend):
-    //   Look up the image by id and stream back its raw bytes with the
-    //   correct Content-Type header, so the frontend can use this URL
-    //   directly as an <img src="..."> value.
-    // ======================================
     @GetMapping("/{id}/data")
     public ResponseEntity<byte[]> getImageData(@PathVariable Long id) {
-        ImageEntity image = null; //write code to get the ImageEntity from imageRepository
+        ImageEntity image = imageRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
 
         MediaType mediaType;
         try {
@@ -95,7 +72,7 @@ public class ImageController {
         } catch (Exception e) {
             mediaType = MediaType.APPLICATION_OCTET_STREAM;
         }
-        return ResponseEntity.ok().contentType(mediaType).body(null); // TODO: return image.getData() instead of null
+        return ResponseEntity.ok().contentType(mediaType).body(image.getData());
     }
 
     private static ImageSummaryDto toSummary(ImageEntity image) {

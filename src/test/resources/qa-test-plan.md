@@ -29,7 +29,7 @@ Fill in the `TODO` cells. Add as many rows as you need.
 | T2-02 | TODO: rapid double-click like/unlike | Count stays consistent, no race condition | TODO | |
 | T2-03 | TODO: like count after page refresh | Count persists (loaded from backend) | TODO | |
 
-## Task 3 — Comment on the image
+## Task — Comment on the image
 
 | ID | Steps | Expected result | Pass/Fail | Notes |
 |----|-------|------------------|-----------|-------|
